@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 public class SufeedsGUI extends JFrame {
+    //declaring components
     private databaseOperations dbOps;
     private String loggedInUser = null;
 
@@ -31,11 +32,11 @@ public class SufeedsGUI extends JFrame {
     private DefaultTableModel tableModel;
     private JLabel welcomeLabel;
 
-
+    //constructor
     public SufeedsGUI() {
         dbOps = new databaseOperations();
-        setTitle("Student Feedback System - com.musau.sufeeds");
-        setSize(550, 450);
+        setTitle("Student Feedback System ");
+        setSize(550, 480);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
@@ -43,7 +44,10 @@ public class SufeedsGUI extends JFrame {
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
 
-        mainPanel.add(createAuthPanel(), "AUTH");
+        // Add views to CardLayout
+        mainPanel.add(createWelcomePanel(), "WELCOME");
+        mainPanel.add(createLoginPanel(), "LOGIN");
+        mainPanel.add(createRegisterPanel(), "REGISTER");
         mainPanel.add(createDashboardPanel(), "DASHBOARD");
 
         // Copyright Footer Label
@@ -54,56 +58,116 @@ public class SufeedsGUI extends JFrame {
         add(mainPanel, BorderLayout.CENTER);
         add(footerLabel, BorderLayout.SOUTH);
 
-        cardLayout.show(mainPanel, "AUTH");
+        // Start at the Welcome Screen
+        cardLayout.show(mainPanel, "WELCOME");
     }
 
-    // 1. Authentication Panel using JTabbedPane (Login & Register Tabs)
-    private JPanel createAuthPanel() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+    // 1. Initial Welcome Panel
+    private JPanel createWelcomePanel() {
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.gridx = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        JTabbedPane tabbedPane = new JTabbedPane();
+        JLabel titleLabel = new JLabel("Welcome to Sufeeds!", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
 
-        // Login Sub-panel
-        JPanel loginPanel = new JPanel(new GridLayout(5, 1, 5, 5));
-        loginPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-        loginUserField = new JTextField();
-        loginPassField = new JPasswordField();
-        JButton loginBtn = new JButton("Login");
+        JLabel subtitleLabel = new JLabel("Please choose an option to continue:", SwingConstants.CENTER);
+        subtitleLabel.setFont(new Font("Arial", Font.PLAIN, 13));
 
-        loginPanel.add(new JLabel("Username:"));
-        loginPanel.add(loginUserField);
-        loginPanel.add(new JLabel("Password:"));
-        loginPanel.add(loginPassField);
-        loginPanel.add(loginBtn);
+        JButton navLoginBtn = new JButton("Log In");
+        JButton navRegisterBtn = new JButton("Create Account");
 
-        // Register Sub-panel
-        JPanel regPanel = new JPanel(new GridLayout(5, 1, 5, 5));
-        regPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-        regUserField = new JTextField();
-        regPassField = new JPasswordField();
-        JButton regBtn = new JButton("Register");
+        // Style buttons for visual clarity
+        navLoginBtn.setPreferredSize(new Dimension(180, 35));
+        navRegisterBtn.setPreferredSize(new Dimension(180, 35));
 
-        regPanel.add(new JLabel("Choose Username:"));
-        regPanel.add(regUserField);
-        regPanel.add(new JLabel("Choose Password:"));
-        regPanel.add(regPassField);
-        regPanel.add(regBtn);
+        gbc.gridy = 0;
+        panel.add(titleLabel, gbc);
 
-        // Add tabs to tabbed pane
-        tabbedPane.addTab("Login", loginPanel);
-        tabbedPane.addTab("Register Student", regPanel);
+        gbc.gridy = 1;
+        panel.add(subtitleLabel, gbc);
 
-        panel.add(tabbedPane, BorderLayout.CENTER);
+        gbc.gridy = 2;
+        panel.add(navLoginBtn, gbc);
 
-        // Action Listeners
-        loginBtn.addActionListener(e -> handleLogin());
-        regBtn.addActionListener(e -> handleRegister());
+        gbc.gridy = 3;
+        panel.add(navRegisterBtn, gbc);
+
+        // Navigation Action Listeners
+        navLoginBtn.addActionListener(e -> cardLayout.show(mainPanel, "LOGIN"));
+        navRegisterBtn.addActionListener(e -> cardLayout.show(mainPanel, "REGISTER"));
 
         return panel;
     }
 
-    // 2. Main Dashboard Panel (Submit & View Feedback)
+    // 2. Dedicated Login Panel
+    private JPanel createLoginPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+
+        JLabel headerLabel = new JLabel("Log In to Your Account", SwingConstants.CENTER);
+        headerLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        panel.add(headerLabel, BorderLayout.NORTH);
+
+        JPanel formPanel = new JPanel(new GridLayout(5, 1, 5, 5));
+        formPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
+        loginUserField = new JTextField();
+        loginPassField = new JPasswordField();
+        JButton loginBtn = new JButton("Log In");
+        JButton backBtn = new JButton("Back to Welcome Screen");
+
+        formPanel.add(new JLabel("Username:"));
+        formPanel.add(loginUserField);
+        formPanel.add(new JLabel("Password:"));
+        formPanel.add(loginPassField);
+        formPanel.add(loginBtn);
+
+        panel.add(formPanel, BorderLayout.CENTER);
+        panel.add(backBtn, BorderLayout.SOUTH);
+
+        // Action Listeners
+        loginBtn.addActionListener(e -> handleLogin());
+        backBtn.addActionListener(e -> cardLayout.show(mainPanel, "WELCOME"));
+
+        return panel;
+    }
+
+    // 3. Dedicated Create Account Panel
+    private JPanel createRegisterPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+
+        JLabel headerLabel = new JLabel("Create a New Account", SwingConstants.CENTER);
+        headerLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        panel.add(headerLabel, BorderLayout.NORTH);
+
+        JPanel formPanel = new JPanel(new GridLayout(5, 1, 5, 5));
+        formPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
+        regUserField = new JTextField();
+        regPassField = new JPasswordField();
+        JButton regBtn = new JButton("Add Account");
+        JButton backBtn = new JButton("Back to Welcome Screen");
+
+        formPanel.add(new JLabel("Choose Username:"));
+        formPanel.add(regUserField);
+        formPanel.add(new JLabel("Choose Password:"));
+        formPanel.add(regPassField);
+        formPanel.add(regBtn);
+
+        panel.add(formPanel, BorderLayout.CENTER);
+        panel.add(backBtn, BorderLayout.SOUTH);
+
+        // Action Listeners
+        regBtn.addActionListener(e -> handleRegister());
+        backBtn.addActionListener(e -> cardLayout.show(mainPanel, "WELCOME"));
+
+        return panel;
+    }
+
+    // 4. Main Dashboard Panel (Submit & View Feedback)
     private JPanel createDashboardPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -122,11 +186,11 @@ public class SufeedsGUI extends JFrame {
 
         formPanel.add(new JLabel("Course Name:"));
         formPanel.add(courseField);
-        formPanel.add(new JLabel("Topic:"));
+        formPanel.add(new JLabel("Unit:"));
         formPanel.add(topicField);
         formPanel.add(new JLabel("Lecturer Name:"));
         formPanel.add(lecturerField);
-        formPanel.add(new JLabel("Feedback:"));
+        formPanel.add(new JLabel("Your Feedback:"));
         formPanel.add(new JScrollPane(feedbackArea));
         formPanel.add(new JLabel(""));
         formPanel.add(submitBtn);
@@ -135,7 +199,7 @@ public class SufeedsGUI extends JFrame {
         tableModel = new DefaultTableModel(new String[]{"Student", "Course", "Topic", "Lecturer", "Feedback"}, 0);
         feedbackTable = new JTable(tableModel);
         JScrollPane tableScroll = new JScrollPane(feedbackTable);
-        tableScroll.setBorder(BorderFactory.createTitledBorder("Other students feedback "));
+        tableScroll.setBorder(BorderFactory.createTitledBorder("Other students feedback"));
 
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, formPanel, tableScroll);
         splitPane.setDividerLocation(200);
@@ -173,19 +237,24 @@ public class SufeedsGUI extends JFrame {
         String user = regUserField.getText().trim();
         String pass = new String(regPassField.getPassword()).trim();
 
-        if (user.isEmpty() || pass.isEmpty()) {
+        if (user.isEmpty() || pass.isEmpty()) { // Checks if registration fields are empty
             JOptionPane.showMessageDialog(this, "Please fill in all registration fields.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-
         try {
             if (dbOps.registerUser(user, pass)) {
-                JOptionPane.showMessageDialog(this, "Registration successful! You can now switch to the Login tab.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Registration successful! You can now log in.", "Success", JOptionPane.INFORMATION_MESSAGE); // Displays success confirmation dialog box
                 regUserField.setText("");
                 regPassField.setText("");
+                cardLayout.show(mainPanel, "LOGIN");
             }
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, ex.getMessage(), "Registration Error", JOptionPane.ERROR_MESSAGE);
+            String errorMsg = ex.getMessage().toLowerCase();
+            if (errorMsg.contains("duplicate") || errorMsg.contains("already exists")) {
+                JOptionPane.showMessageDialog(this, "Username exist", "Registration Error", JOptionPane.ERROR_MESSAGE); // Displays specific message when username exists
+            } else {
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Registration Error", JOptionPane.ERROR_MESSAGE); // Displays general database error message if different
+            }
         }
     }
 
