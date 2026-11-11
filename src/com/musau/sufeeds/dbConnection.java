@@ -15,3 +15,4 @@ public class dbConnection {
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 }
+//the app  uses the getconnection method as a key to the database

@@ -1,3 +1,5 @@
+//Lloyd Musau, BBIT, 227326, 10th-11th Nov 2026
+
 package com.musau.sufeeds;
 
 import javax.swing.*;
@@ -90,7 +92,7 @@ public class SufeedsGUI extends JFrame {
 
         // Add tabs to tabbed pane
         tabbedPane.addTab("Login", loginPanel);
-        tabbedPane.addTab("Register Account", regPanel);
+        tabbedPane.addTab("Register Student", regPanel);
 
         panel.add(tabbedPane, BorderLayout.CENTER);
 
@@ -133,7 +135,7 @@ public class SufeedsGUI extends JFrame {
         tableModel = new DefaultTableModel(new String[]{"Student", "Course", "Topic", "Lecturer", "Feedback"}, 0);
         feedbackTable = new JTable(tableModel);
         JScrollPane tableScroll = new JScrollPane(feedbackTable);
-        tableScroll.setBorder(BorderFactory.createTitledBorder("Peer Feedback Stream"));
+        tableScroll.setBorder(BorderFactory.createTitledBorder("Other students feedback "));
 
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, formPanel, tableScroll);
         splitPane.setDividerLocation(200);

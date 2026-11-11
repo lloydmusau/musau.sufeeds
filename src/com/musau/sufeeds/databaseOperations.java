@@ -1,6 +1,6 @@
 //Lloyd Musau, BBIT, 227326, 10th Nov 2026
 package com.musau.sufeeds;
-//handles how the db operates
+//handles how the db operates with the application
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +23,7 @@ public class databaseOperations {
 
     // Authenticate user login
     public boolean loginUser(String username, String password) throws SQLException {
-        String sql = "SELECT * FROM tbl_studentdetails WHERE username = ? AND password = ? LIMIT 1";
+        String sql = "SELECT * FROM tbl_studentdetails WHERE username = ? AND password = ? LIMIT 2";
         try (Connection conn = dbConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, username);
