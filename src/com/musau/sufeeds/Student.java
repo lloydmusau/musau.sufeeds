@@ -1,4 +1,4 @@
-//Lloyd Musau, BBIT, 227326, 10th Nov 2026
+//Lloyd Musau, BBIT, 227326, 8th Nov 2026
 package com.musau.sufeeds;
 //child class
 public class Student extends Academics {

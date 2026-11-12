@@ -1,5 +1,4 @@
-//Lloyd Musau, BBIT, 227326, 10th-11th Nov 2026
-
+//Lloyd Musau, BBIT, 227326, 10th-17th Nov 2026
 package com.musau.sufeeds;
 
 import javax.swing.*;
@@ -9,33 +8,36 @@ import java.sql.SQLException;
 import java.util.List;
 
 public class SufeedsGUI extends JFrame {
-    //declaring components
+
+    // database object
     private databaseOperations dbOps;
     private String loggedInUser = null;
 
-    // UI Components
+    // for switching between screens
     private CardLayout cardLayout;
     private JPanel mainPanel;
 
-    // Login Panel Components
+    // login screen
     private JTextField loginUserField;
     private JPasswordField loginPassField;
 
-    // Register Panel Components
+    // register screen
     private JTextField regUserField;
     private JPasswordField regPassField;
+    private JTextField regUnitsField;
 
-    // Dashboard Panel Components
-    private JTextField courseField, topicField, lecturerField;
+    // dashboard screen
+    private JTextField courseField, lecturerField;
+    private JComboBox<String> unitDropdown;
     private JTextArea feedbackArea;
     private JTable feedbackTable;
     private DefaultTableModel tableModel;
     private JLabel welcomeLabel;
 
-    //constructor
+    // constructor
     public SufeedsGUI() {
         dbOps = new databaseOperations();
-        setTitle("Student Feedback System ");
+        setTitle("SU feeds");
         setSize(550, 480);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -44,66 +46,49 @@ public class SufeedsGUI extends JFrame {
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
 
-        // Add views to CardLayout
+        // add all the screens
         mainPanel.add(createWelcomePanel(), "WELCOME");
         mainPanel.add(createLoginPanel(), "LOGIN");
         mainPanel.add(createRegisterPanel(), "REGISTER");
         mainPanel.add(createDashboardPanel(), "DASHBOARD");
 
-        // Copyright Footer Label
+        // copyright at the bottom
         JLabel footerLabel = new JLabel("© 2026 Lloyd Musau Mulinge. All Rights Reserved.", SwingConstants.CENTER);
         footerLabel.setFont(new Font("Arial", Font.ITALIC, 11));
-        footerLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
 
         add(mainPanel, BorderLayout.CENTER);
         add(footerLabel, BorderLayout.SOUTH);
 
-        // Start at the Welcome Screen
+        // show welcome screen first
         cardLayout.show(mainPanel, "WELCOME");
     }
 
-    // 1. Initial Welcome Panel
+    // welcome screen
     private JPanel createWelcomePanel() {
-        JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
-        gbc.gridx = 0;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        JPanel panel = new JPanel(new GridLayout(4, 1, 10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(40, 120, 40, 120));
 
         JLabel titleLabel = new JLabel("Welcome to Sufeeds!", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
 
         JLabel subtitleLabel = new JLabel("Please choose an option to continue:", SwingConstants.CENTER);
-        subtitleLabel.setFont(new Font("Arial", Font.PLAIN, 13));
 
         JButton navLoginBtn = new JButton("Log In");
         JButton navRegisterBtn = new JButton("Create Account");
 
-        // Style buttons for visual clarity
-        navLoginBtn.setPreferredSize(new Dimension(180, 35));
-        navRegisterBtn.setPreferredSize(new Dimension(180, 35));
+        panel.add(titleLabel);
+        panel.add(subtitleLabel);
+        panel.add(navLoginBtn);
+        panel.add(navRegisterBtn);
 
-        gbc.gridy = 0;
-        panel.add(titleLabel, gbc);
-
-        gbc.gridy = 1;
-        panel.add(subtitleLabel, gbc);
-
-        gbc.gridy = 2;
-        panel.add(navLoginBtn, gbc);
-
-        gbc.gridy = 3;
-        panel.add(navRegisterBtn, gbc);
-
-        // Navigation Action Listeners
+        // button clicks
         navLoginBtn.addActionListener(e -> cardLayout.show(mainPanel, "LOGIN"));
         navRegisterBtn.addActionListener(e -> cardLayout.show(mainPanel, "REGISTER"));
 
         return panel;
     }
 
-    // 2. Dedicated Login Panel
+    // login screen
     private JPanel createLoginPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
@@ -113,12 +98,9 @@ public class SufeedsGUI extends JFrame {
         panel.add(headerLabel, BorderLayout.NORTH);
 
         JPanel formPanel = new JPanel(new GridLayout(5, 1, 5, 5));
-        formPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
         loginUserField = new JTextField();
         loginPassField = new JPasswordField();
         JButton loginBtn = new JButton("Log In");
-
-
         JButton backBtn = new JButton("Back to Welcome Screen");
 
         formPanel.add(new JLabel("Username:"));
@@ -130,14 +112,13 @@ public class SufeedsGUI extends JFrame {
         panel.add(formPanel, BorderLayout.CENTER);
         panel.add(backBtn, BorderLayout.SOUTH);
 
-        // Action Listeners
-        loginBtn.addActionListener(e -> handleLogin());
+        loginBtn.addActionListener(e -> HandleLogin());
         backBtn.addActionListener(e -> cardLayout.show(mainPanel, "WELCOME"));
 
         return panel;
     }
 
-    // 3. Dedicated Create Account Panel
+    // register screen
     private JPanel createRegisterPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
@@ -146,10 +127,12 @@ public class SufeedsGUI extends JFrame {
         headerLabel.setFont(new Font("Arial", Font.BOLD, 16));
         panel.add(headerLabel, BorderLayout.NORTH);
 
-        JPanel formPanel = new JPanel(new GridLayout(5, 1, 5, 5));
-        formPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
+        JPanel formPanel = new JPanel(new GridLayout(7, 1, 5, 5));
+
         regUserField = new JTextField();
         regPassField = new JPasswordField();
+        regUnitsField = new JTextField();
+
         JButton regBtn = new JButton("Add Account");
         JButton backBtn = new JButton("Back to Welcome Screen");
 
@@ -157,47 +140,46 @@ public class SufeedsGUI extends JFrame {
         formPanel.add(regUserField);
         formPanel.add(new JLabel("Choose Password:"));
         formPanel.add(regPassField);
+        formPanel.add(new JLabel("Enter Units (comma-separated e.g., OOP, Calculus, Finance):"));
+        formPanel.add(regUnitsField);
         formPanel.add(regBtn);
 
         panel.add(formPanel, BorderLayout.CENTER);
         panel.add(backBtn, BorderLayout.SOUTH);
 
-        // Action Listeners
         regBtn.addActionListener(e -> handleRegister());
         backBtn.addActionListener(e -> cardLayout.show(mainPanel, "WELCOME"));
 
         return panel;
     }
 
-    // 4. Main Dashboard Panel (Submit, View Feedback & Log Out)
+    // dashboard screen
     private JPanel createDashboardPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        JPanel topPanel = new JPanel(new BorderLayout());
 
+        // top part with welcome label and logout button
+        JPanel topPanel = new JPanel(new BorderLayout());
         welcomeLabel = new JLabel("Welcome");
         welcomeLabel.setFont(new Font("Arial", Font.BOLD, 14));
 
         JButton logoutBtn = new JButton("Log Out");
         logoutBtn.addActionListener(e -> handleLogout());
+        topPanel.add(welcomeLabel, BorderLayout.WEST);
+        topPanel.add(logoutBtn, BorderLayout.EAST);
 
-        topPanel.add(welcomeLabel, BorderLayout.WEST);  // Puts welcome message on the left
-        topPanel.add(logoutBtn, BorderLayout.EAST);     // Puts log out button on the right
-
-        panel.add(topPanel, BorderLayout.NORTH);        // Adds the top header panel to the dashboard
-
-        // Form for submitting feedback
+        // form for feedback
         JPanel formPanel = new JPanel(new GridLayout(5, 2, 5, 5));
         courseField = new JTextField();
-        topicField = new JTextField();
+        unitDropdown = new JComboBox<>();
         lecturerField = new JTextField();
         feedbackArea = new JTextArea(3, 20);
         JButton submitBtn = new JButton("Submit Feedback");
 
         formPanel.add(new JLabel("Course Name:"));
         formPanel.add(courseField);
-        formPanel.add(new JLabel("Unit:"));
-        formPanel.add(topicField);
+        formPanel.add(new JLabel("Enter your Units:"));
+        formPanel.add(unitDropdown);
         formPanel.add(new JLabel("Lecturer Name:"));
         formPanel.add(lecturerField);
         formPanel.add(new JLabel("Your Feedback:"));
@@ -205,15 +187,19 @@ public class SufeedsGUI extends JFrame {
         formPanel.add(new JLabel(""));
         formPanel.add(submitBtn);
 
-        // peer feedback
-        tableModel = new DefaultTableModel(new String[]{"Student", "Course", "Unit name ", "Lecturer", "Feedbacks"}, 0);
+        // table to show other students feedback
+        tableModel = new DefaultTableModel(new String[]{"Student", "Course", "Unit", "Lecturer", "Feedback"}, 0);
         feedbackTable = new JTable(tableModel);
         JScrollPane tableScroll = new JScrollPane(feedbackTable);
         tableScroll.setBorder(BorderFactory.createTitledBorder("Other students feedback"));
 
-        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, formPanel, tableScroll);
-        splitPane.setDividerLocation(200);
-        panel.add(splitPane, BorderLayout.CENTER);
+        // put form on top and table in the middle
+        JPanel centerPanel = new JPanel(new BorderLayout(10, 10));
+        centerPanel.add(formPanel, BorderLayout.NORTH);
+        centerPanel.add(tableScroll, BorderLayout.CENTER);
+
+        panel.add(topPanel, BorderLayout.NORTH);
+        panel.add(centerPanel, BorderLayout.CENTER);
 
         submitBtn.addActionListener(e -> handleSubmitFeedback());
 
@@ -221,28 +207,28 @@ public class SufeedsGUI extends JFrame {
     }
 
     private void handleLogout() {
-        // Ask the user for confirmation before logging out
+        // ask first
         int choice = JOptionPane.showConfirmDialog(this, "Are you sure you want to log out?", "Log Out", JOptionPane.YES_NO_OPTION);
 
         if (choice == JOptionPane.YES_OPTION) {
-            loggedInUser = null; // Clear the active user session
+            loggedInUser = null;
 
-            // Clear all form input fields so the next user doesn't see old data
+            // clear everything
             courseField.setText("");
-            topicField.setText("");
             lecturerField.setText("");
             feedbackArea.setText("");
-            tableModel.setRowCount(0); // Clear the feedback table
+            tableModel.setRowCount(0);
 
-            // Switch the screen back to the Welcome panel
+            // go back to welcome screen
             cardLayout.show(mainPanel, "WELCOME");
         }
     }
 
-    private void handleLogin() {
+    private void HandleLogin() {
         String user = loginUserField.getText().trim();
         String pass = new String(loginPassField.getPassword()).trim();
 
+        // check if empty
         if (user.isEmpty() || pass.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please fill in all login fields.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
@@ -265,47 +251,55 @@ public class SufeedsGUI extends JFrame {
     private void handleRegister() {
         String user = regUserField.getText().trim();
         String pass = new String(regPassField.getPassword()).trim();
+        String units = regUnitsField.getText().trim();
 
-        if (user.isEmpty() || pass.isEmpty()) { // Checks if registration fields are empty
-            JOptionPane.showMessageDialog(this, "Please fill in all registration fields.", "Error", JOptionPane.ERROR_MESSAGE);
+        // check if empty
+        if (user.isEmpty() || pass.isEmpty() || units.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please fill in all registration fields, including units.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
+
         try {
-            if (dbOps.registerUser(user, pass)) {
-                JOptionPane.showMessageDialog(this, "Registration successful! You can now log in.", "Success", JOptionPane.INFORMATION_MESSAGE); // Displays success confirmation dialog box
+            if (dbOps.registerUser(user, pass, units)) {
+                JOptionPane.showMessageDialog(this, "Registration successful! You can now log in.", "Success", JOptionPane.INFORMATION_MESSAGE);
                 regUserField.setText("");
                 regPassField.setText("");
+                regUnitsField.setText("");
                 cardLayout.show(mainPanel, "LOGIN");
             }
         } catch (SQLException ex) {
             String errorMsg = ex.getMessage().toLowerCase();
             if (errorMsg.contains("duplicate") || errorMsg.contains("already exists")) {
-                JOptionPane.showMessageDialog(this, "Username exist", "Registration Error", JOptionPane.ERROR_MESSAGE); // Displays specific message when username exists
+                JOptionPane.showMessageDialog(this, "Username exist", "Registration Error", JOptionPane.ERROR_MESSAGE);
             } else {
-                JOptionPane.showMessageDialog(this, ex.getMessage(), "Registration Error", JOptionPane.ERROR_MESSAGE); // Displays general database error message if different
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Registration Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
 
     private void handleSubmitFeedback() {
         String course = courseField.getText().trim();
-        String topic = topicField.getText().trim();
         String lecturer = lecturerField.getText().trim();
         String feedback = feedbackArea.getText().trim();
 
-        if (course.isEmpty() || topic.isEmpty() || lecturer.isEmpty() || feedback.isEmpty()) {
+        // get the unit that was picked
+        String unit = "";
+        if (unitDropdown.getSelectedItem() != null) {
+            unit = unitDropdown.getSelectedItem().toString();
+        }
+
+        // check if empty
+        if (course.isEmpty() || unit.isEmpty() || lecturer.isEmpty() || feedback.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please complete all feedback fields.", "Warning", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         try {
-            Student newLog = new Student(loggedInUser, course, topic, lecturer, feedback);
+            Student newLog = new Student(loggedInUser, course, unit, lecturer, feedback);
             dbOps.addClassLog(newLog);
             JOptionPane.showMessageDialog(this, "Feedback submitted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
 
-            // Clear fields and refresh table
             courseField.setText("");
-            topicField.setText("");
             lecturerField.setText("");
             feedbackArea.setText("");
             loadFeedbackTable();
@@ -315,9 +309,18 @@ public class SufeedsGUI extends JFrame {
     }
 
     private void loadFeedbackTable() {
-        tableModel.setRowCount(0); // Clear existing rows
+        // remove old rows first
+        tableModel.setRowCount(0);
+
         try {
-            // Load only other students' feedback using dbOps
+            // put the student's units in the dropdown
+            String[] studentUnits = dbOps.getStudentUnits(loggedInUser);
+            unitDropdown.removeAllItems();
+            for (String u : studentUnits) {
+                unitDropdown.addItem(u.trim());
+            }
+
+            // get feedback from other students and add to table
             List<Student> list = dbOps.getOtherFeedback(loggedInUser);
             for (Student s : list) {
                 tableModel.addRow(new Object[]{
@@ -329,7 +332,7 @@ public class SufeedsGUI extends JFrame {
                 });
             }
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Error loading feedback stream: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error loading data: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
