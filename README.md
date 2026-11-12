@@ -34,10 +34,24 @@ A Java-based desktop application designed for students to securely register, log
 
 To run this application, you will need a MySQL database configured with the following tables:
 
-1. **`tbl_students`** (Stores login credentials)
+1. **`tbl_students`** (Stores login credentials and each student's units)
    ```sql
    CREATE TABLE tbl_students (
        id INT AUTO_INCREMENT PRIMARY KEY,
        username VARCHAR(50) UNIQUE NOT NULL,
-       password VARCHAR(255) NOT NULL
+       password VARCHAR(255) NOT NULL,
+       units VARCHAR(255)
    );
+   ```
+
+2. **`tbl_studentdetails`** (Stores the feedback students submit)
+   ```sql
+   CREATE TABLE tbl_studentdetails (
+       id INT AUTO_INCREMENT PRIMARY KEY,
+       username VARCHAR(50) NOT NULL,
+       course_name VARCHAR(100),
+       topic VARCHAR(100),
+       lecturer_name VARCHAR(100),
+       feedback TEXT
+   );
+   ```   
