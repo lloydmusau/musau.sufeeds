@@ -117,6 +117,8 @@ public class SufeedsGUI extends JFrame {
         loginUserField = new JTextField();
         loginPassField = new JPasswordField();
         JButton loginBtn = new JButton("Log In");
+
+
         JButton backBtn = new JButton("Back to Welcome Screen");
 
         formPanel.add(new JLabel("Username:"));
@@ -167,14 +169,22 @@ public class SufeedsGUI extends JFrame {
         return panel;
     }
 
-    // 4. Main Dashboard Panel (Submit & View Feedback)
+    // 4. Main Dashboard Panel (Submit, View Feedback & Log Out)
     private JPanel createDashboardPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        JPanel topPanel = new JPanel(new BorderLayout());
 
         welcomeLabel = new JLabel("Welcome");
         welcomeLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        panel.add(welcomeLabel, BorderLayout.NORTH);
+
+        JButton logoutBtn = new JButton("Log Out");
+        logoutBtn.addActionListener(e -> handleLogout());
+
+        topPanel.add(welcomeLabel, BorderLayout.WEST);  // Puts welcome message on the left
+        topPanel.add(logoutBtn, BorderLayout.EAST);     // Puts log out button on the right
+
+        panel.add(topPanel, BorderLayout.NORTH);        // Adds the top header panel to the dashboard
 
         // Form for submitting feedback
         JPanel formPanel = new JPanel(new GridLayout(5, 2, 5, 5));
@@ -195,8 +205,8 @@ public class SufeedsGUI extends JFrame {
         formPanel.add(new JLabel(""));
         formPanel.add(submitBtn);
 
-        // Table for viewing peer feedback
-        tableModel = new DefaultTableModel(new String[]{"Student", "Course", "Topic", "Lecturer", "Feedback"}, 0);
+        // peer feedback
+        tableModel = new DefaultTableModel(new String[]{"Student", "Course", "Unit name ", "Lecturer", "Feedbacks"}, 0);
         feedbackTable = new JTable(tableModel);
         JScrollPane tableScroll = new JScrollPane(feedbackTable);
         tableScroll.setBorder(BorderFactory.createTitledBorder("Other students feedback"));
@@ -208,6 +218,25 @@ public class SufeedsGUI extends JFrame {
         submitBtn.addActionListener(e -> handleSubmitFeedback());
 
         return panel;
+    }
+
+    private void handleLogout() {
+        // Ask the user for confirmation before logging out
+        int choice = JOptionPane.showConfirmDialog(this, "Are you sure you want to log out?", "Log Out", JOptionPane.YES_NO_OPTION);
+
+        if (choice == JOptionPane.YES_OPTION) {
+            loggedInUser = null; // Clear the active user session
+
+            // Clear all form input fields so the next user doesn't see old data
+            courseField.setText("");
+            topicField.setText("");
+            lecturerField.setText("");
+            feedbackArea.setText("");
+            tableModel.setRowCount(0); // Clear the feedback table
+
+            // Switch the screen back to the Welcome panel
+            cardLayout.show(mainPanel, "WELCOME");
+        }
     }
 
     private void handleLogin() {
@@ -307,4 +336,5 @@ public class SufeedsGUI extends JFrame {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new SufeedsGUI().setVisible(true));
     }
+
 }
